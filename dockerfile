@@ -1,19 +1,15 @@
 
-
 FROM node:21-alpine3.19
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-# COPY package-lock.json ./
-
-
 RUN yarn install
 
 COPY . .
 
-# RUN npx prisma generate
-# RUN npx mikro-orm migration:up
+RUN yarn build
 
 EXPOSE 3001
 
+CMD ["sh", "-c", "npm run mikro-orm:schema:update && yarn dev"]
