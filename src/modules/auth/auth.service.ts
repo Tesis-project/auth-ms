@@ -188,7 +188,6 @@ export class AuthService {
 
             const new_user = await this._AuthRepositoryService.create_user({
                 email,
-                name,
                 password: bcrypt.hashSync(password, 10)
             }, f_em);
 

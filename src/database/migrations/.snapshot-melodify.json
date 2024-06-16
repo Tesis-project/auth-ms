@@ -16,15 +16,6 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "string"
-        },
         "email": {
           "name": "email",
           "type": "varchar(255)",
@@ -60,7 +51,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
-          "default": "'2024-06-14 19:37:15'",
+          "default": "'2024-06-15 13:59:29'",
           "mappedType": "datetime"
         },
         "updated_at": {
@@ -71,7 +62,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
-          "default": "'2024-06-14 19:37:15'",
+          "default": "'2024-06-15 13:59:29'",
           "mappedType": "datetime"
         },
         "last_session": {
@@ -83,6 +74,27 @@
           "nullable": true,
           "length": 6,
           "mappedType": "datetime"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'PENDING'",
+          "enumItems": [
+            "NONE",
+            "VERIFIED",
+            "NOT",
+            "BLOCKED",
+            "DELETED",
+            "SUSPENDED",
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
+          ],
+          "mappedType": "enum"
         }
       },
       "name": "auth",

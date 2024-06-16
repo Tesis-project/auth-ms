@@ -12,4 +12,4 @@ RUN yarn build
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "npm run mikro-orm:schema:update && yarn dev"]
+CMD ["sh", "-c", "npx mikro-orm migration:up && yarn dev"]

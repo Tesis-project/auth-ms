@@ -27,8 +27,6 @@ async function bootstrap() {
     await app.listen();
     logger.log(`Microservice is running`);
 
-    //     const logger = new Logger('Auth - ms - Main')
-
     // const app = await NestFactory.create(AppModule);
 
     // app.setGlobalPrefix('api');
