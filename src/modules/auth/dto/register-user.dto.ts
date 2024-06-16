@@ -7,12 +7,14 @@ export class RegisterUser_Dto {
     name: string;
 
     @IsString()
+    last_name: string;
+
+    @IsString()
     @IsEmail()
     email: string;
 
     @IsString()
     @IsStrongPassword()
     password: string;
-
 
 }

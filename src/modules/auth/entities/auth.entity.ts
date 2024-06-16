@@ -49,4 +49,9 @@ export class Auth_Ety extends Schema_key {
     @Property()
     status: AuthStatus_Enum;
 
+    @Property({
+        type: 'varchar'
+    })
+    user: any;
+
 }
