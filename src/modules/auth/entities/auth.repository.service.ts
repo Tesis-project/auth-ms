@@ -2,7 +2,7 @@
 https://docs.nestjs.com/providers#services
 */
 
-import { EntityManager, EntityName, EntityRepository } from '@mikro-orm/core';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import { Auth_Ety } from './auth.entity';
 
@@ -16,19 +16,19 @@ export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
         super(em, Auth_Ety);
     }
 
-    async create_user(user: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
+    async create_auth(auth: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
 
         const _em = em ?? this.em;
-        const new_user = await _em.create(Auth_Ety, user);
+        const new_user = await _em.create(Auth_Ety, auth);
         await _em.persistAndFlush(new_user);
         return new_user;
 
     }
 
-    async find_one(user: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
+    async find_one(auth: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
 
         const _em = em ?? this.em;
-        return await _em.findOne(Auth_Ety, user);
+        return await _em.findOne(Auth_Ety, auth);
 
     }
 
@@ -37,10 +37,10 @@ export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
         return await _em.find(Auth_Ety, {});
     }
 
-    async delete_user(user: Partial<Auth_Ety>, em?: EntityManager): Promise<boolean> {
+    async delete_auth(auth: Partial<Auth_Ety>, em?: EntityManager): Promise<boolean> {
         const _em = em ?? this.em;
-        // const user = await _em.findOne(Auth_Ety, { id });
-        const user_find = await this.find_one(user, _em);
+        // const auth = await _em.findOne(Auth_Ety, { id });
+        const user_find = await this.find_one(auth, _em);
 
         if (!user_find) {
             throw new Error('User not found');
@@ -50,11 +50,11 @@ export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
         return true;
     }
 
-    async update_user(user: Partial<Auth_Ety>, updateData: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
+    async update_auth(auth: Partial<Auth_Ety>, updateData: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
 
         const _em = em ?? this.em;
 
-        const user_find = await this.find_one(user, _em);
+        const user_find = await this.find_one(auth, _em);
 
         if (!user_find) {
             throw new Error('User not found');

@@ -19,7 +19,13 @@ interface EnvVars_I {
 
     NODE_ENV: NodeEnv;
 
-    DB_URL: string;
+    DB_PASSWORD: string;
+    DB_NAME: string;
+    DB_HOST: string;
+    DB_PORT: number;
+    DB_USERNAME: string;
+
+    // DB_URL: string;
 }
 
 const envsSchema = joi.object({
@@ -31,8 +37,13 @@ const envsSchema = joi.object({
 
     NODE_ENV: joi.string().valid(NodeEnv.DEVELOPMENT, NodeEnv.STAGING, NodeEnv.PRODUCTION).required(),
 
+    DB_PASSWORD: joi.string().required(),
+    DB_NAME: joi.string().required(),
+    DB_HOST: joi.string().required(),
+    DB_PORT: joi.number().required(),
+    DB_USERNAME: joi.string().required(),
 
-    DB_URL: joi.string().required()
+    // DB_URL: joi.string().required()
 
 }).unknown(true);
 
@@ -60,7 +71,11 @@ export const envs = {
     jwtSecret: envVars.JWT_SECRET,
     nodeEnv: envVars.NODE_ENV,
 
- 
+    db_password: envVars.DB_PASSWORD,
+    db_name: envVars.DB_NAME,
+    db_host: envVars.DB_HOST,
+    db_port: envVars.DB_PORT,
+    db_username: envVars.DB_USERNAME,
 
-    db_url: envVars.DB_URL
+    // db_url: envVars.DB_URL
 }

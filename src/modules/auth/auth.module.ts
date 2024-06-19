@@ -8,6 +8,7 @@ import { envs } from '../../core/config/envs';
 import { AuthRepositoryService } from './entities';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { NatsModule } from '../../core/transports/nats.module';
 
 @Module({
     controllers: [AuthController],
@@ -34,6 +35,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         MikroOrmModule.forFeature([
             Auth_Ety
         ]),
+
+        NatsModule
     ]
 })
 export class AuthModule { }

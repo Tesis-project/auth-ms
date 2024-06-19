@@ -1,20 +1,21 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { JWT_Payload_I } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUser_Dto, RegisterUser_Dto } from './dto';
 import { _Response_I } from '../../core/interfaces';
 import { AuthRepositoryService } from './entities';
 
 import * as bcrypt from 'bcrypt';
 import { TempoHandler } from '../../core/classes/TempoHandler';
 import { envs } from '../../core/config/envs';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { EntityManager } from '@mikro-orm/core';
 import { ExceptionsHandler } from '../../core/helpers';
+import { NATS_SERVICE } from '../../core/config/services';
+import { UserService_GW } from '../user/user.service';
+import { LoginAuth_Dto, RegisterAuth_Dto } from './dto';
 
 @Injectable()
 export class AuthService {
-
 
     private readonly logger = new Logger('AuthService');
 
@@ -23,7 +24,10 @@ export class AuthService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly _AuthRepositoryService: AuthRepositoryService,
-        private readonly em: EntityManager
+        private readonly em: EntityManager,
+
+        private readonly _UserService_GW: UserService_GW
+
     ) {
 
     }
@@ -57,7 +61,7 @@ export class AuthService {
 
         try {
 
-            const user = await this.find_user_by_email(email, f_em);
+            const user = await this.find_auth_by_email(email, f_em);
 
             if (!user) {
                 this.logger.warn(`[Update last session] El usuario ${email} no existe`);
@@ -85,7 +89,7 @@ export class AuthService {
 
     }
 
-    async find_user_by_email(email: string, f_em: EntityManager) {
+    async find_auth_by_email(email: string, f_em: EntityManager) {
 
         const user = await this._AuthRepositoryService.find_one({email}, f_em);
         return user;
@@ -93,18 +97,18 @@ export class AuthService {
     }
 
 
-    async login(LoginUser_Dto: LoginUser_Dto) {
+    async login(LoginAuth_Dto: LoginAuth_Dto) {
 
         let _Response: _Response_I;
         const {
             email,
             password,
-        } = LoginUser_Dto;
+        } =LoginAuth_Dto;
 
         try {
 
             const f_em = this.em.fork();
-            const user = await this.find_user_by_email(email, f_em);
+            const user = await this.find_auth_by_email(email, f_em);
 
             if (!user) {
                 this.logger.warn(`[Login user] El usuario ${email} no existe`);
@@ -142,7 +146,7 @@ export class AuthService {
             _Response = {
                 ok: true,
                 statusCode: HttpStatus.OK,
-                message: 'User logged',
+                message: 'Sesión iniciada, bienvenido',
                 data: {
                     user: rest,
                     token: await this.signJWT(rest)
@@ -161,22 +165,23 @@ export class AuthService {
 
     }
 
-    async registerUser(RegisterUser_Dto: RegisterUser_Dto) {
+    async create_auth(RegisterAuth_Dto: RegisterAuth_Dto) {
 
         let _Response: _Response_I;
 
         const {
             email,
             name,
+            last_name,
             password,
-        } = RegisterUser_Dto;
+        } = RegisterAuth_Dto;
 
         try {
 
             const f_em = this.em.fork();
-             const user = await this.find_user_by_email(email, f_em);
+            const auth = await this.find_auth_by_email(email, f_em);
 
-            if (user) {
+            if (auth) {
                 _Response = {
                     ok: false,
                     data: null,
@@ -186,18 +191,30 @@ export class AuthService {
                 throw new RpcException(_Response)
             }
 
-            const new_user = await this._AuthRepositoryService.create_user({
+            let new_auth = await this._AuthRepositoryService.create_auth({
                 email,
-                password: bcrypt.hashSync(password, 10)
+                password: bcrypt.hashSync(password, 10),
+                user: '-'
+            }, f_em);
+
+            const new_user = await this._UserService_GW.create_user( {
+                auth: new_auth._id,
+                name,
+                last_name
+            } );
+
+            new_auth = await this._AuthRepositoryService.update_auth(new_auth, {
+                user: new_user.data._id
             }, f_em);
 
             _Response = {
                 ok: true,
                 statusCode: HttpStatus.CREATED,
-                message: 'User created',
+                message: 'Usuario registrado',
                 data: {
-                    ...new_user,
-                    password: '********'
+                    ...new_auth,
+                    password: '********',
+                    user: { ...new_user.data }
                 }
             }
 

@@ -1,4 +1,4 @@
 
-export { LoginUser_Dto } from './login-user.dto';
-export { RegisterUser_Dto } from './register-user.dto';
+export { LoginAuth_Dto } from './login-user.dto';
+export { RegisterAuth_Dto } from './register-user.dto';
 

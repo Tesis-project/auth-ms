@@ -51,7 +51,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
-          "default": "'2024-06-15 13:59:29'",
+          "default": "'2024-06-16 23:17:17'",
           "mappedType": "datetime"
         },
         "updated_at": {
@@ -62,7 +62,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
-          "default": "'2024-06-15 13:59:29'",
+          "default": "'2024-06-16 23:17:17'",
           "mappedType": "datetime"
         },
         "last_session": {
@@ -95,6 +95,15 @@
             "INACTIVE"
           ],
           "mappedType": "enum"
+        },
+        "user": {
+          "name": "user",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
         }
       },
       "name": "auth",
@@ -116,6 +125,16 @@
           ],
           "composite": false,
           "keyName": "auth_username_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "user"
+          ],
+          "composite": false,
+          "keyName": "auth_user_unique",
           "constraint": true,
           "primary": false,
           "unique": true
