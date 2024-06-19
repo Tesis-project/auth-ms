@@ -10,11 +10,11 @@ import { UserModule } from './modules/user/user.module';
         UserModule,
         AuthModule
     ],
-    controllers: [],
+    controllers: [
+
+    ],
     providers: [
 
     ],
 })
 export class AppModule { }
-
-
