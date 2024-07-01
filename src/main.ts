@@ -2,13 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { envs } from './core/config/envs';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { MicroserviceOptions, RpcException, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
 
-    const logger = new Logger('Auth-ms - Main')
+    const logger = new Logger('Auth-MS - Main')
 
-     const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+    const app = await NestFactory.createMicroservice<MicroserviceOptions>(
         AppModule,
         {
             transport: Transport.NATS,
@@ -18,14 +18,30 @@ async function bootstrap() {
         }
     );
 
-    app.useGlobalPipes(
-        new ValidationPipe({
-            whitelist: true,
-            forbidNonWhitelisted: true
-        })
-    );
+    app.useGlobalPipes(new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        exceptionFactory: (errors) => {
+            const formattedErrors = errors.map(err => {
+                if (err.constraints) {
+                    return Object.values(err.constraints);
+                } else if (err.children && err.children.length > 0) {
+                    return err.children.map(child => Object.values(child.constraints)).flat();
+                } else {
+                    return `Validation failed for property ${err.property}`;
+                }
+            }).flat();
+            return new RpcException({
+                statusCode: 400,
+                message: [...formattedErrors],
+                err: 'Bad Request',
+            });
+        }
+    }));
+
     await app.listen();
-    logger.log(`Microservice is running`);
+    logger.log(`[Auth-MS] Microservice is running`);
 
     // const app = await NestFactory.create(AppModule);
 

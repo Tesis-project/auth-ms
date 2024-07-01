@@ -1,2 +1,0 @@
-export { TempoHandler } from "./TempoHandler";
-

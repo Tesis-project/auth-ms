@@ -2,7 +2,8 @@ import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { LoginAuth_Dto, RegisterAuth_Dto } from './dto';
+
+import { LoginAuth_Dto, RegisterAuth_Dto } from '@tesis-project/dev-globals/dist/modules/auth/dto';
 
 @Controller()
 export class AuthController {

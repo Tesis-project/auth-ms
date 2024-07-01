@@ -1,18 +1,25 @@
 import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { JWT_Payload_I } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
-import { _Response_I } from '../../core/interfaces';
 import { AuthRepositoryService } from './entities';
 
 import * as bcrypt from 'bcrypt';
-import { TempoHandler } from '../../core/classes/TempoHandler';
 import { envs } from '../../core/config/envs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { EntityManager } from '@mikro-orm/core';
 import { ExceptionsHandler } from '../../core/helpers';
 import { NATS_SERVICE } from '../../core/config/services';
 import { UserService_GW } from '../user/user.service';
-import { LoginAuth_Dto, RegisterAuth_Dto } from './dto';
+
+import {
+    LoginAuth_Dto,
+    RegisterAuth_Dto
+} from "@tesis-project/dev-globals/dist/modules/auth/dto"
+
+import {
+    TempoHandler
+} from "@tesis-project/dev-globals/dist/classes"
+import { _Response_I } from '@tesis-project/dev-globals/dist/interfaces';
 
 @Injectable()
 export class AuthService {

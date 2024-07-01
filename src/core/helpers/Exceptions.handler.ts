@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
-import { _Response_I } from "../interfaces";
 import { RpcException } from "@nestjs/microservices";
+import { _Response_I } from "@tesis-project/dev-globals/dist/interfaces";
 
 
 
@@ -11,6 +11,8 @@ export class ExceptionsHandler {
     }
 
     EmitException(error: any, context?: string) {
+
+        console.log('viene por exception', error);
 
         if (this.isResponseStructure(error?.error)) {
 
