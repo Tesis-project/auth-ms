@@ -20,6 +20,7 @@ import {
     TempoHandler
 } from "@tesis-project/dev-globals/dist/classes"
 import { _Response_I } from '@tesis-project/dev-globals/dist/interfaces';
+import * as uuid from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +30,7 @@ export class AuthService {
     ExceptionsHandler = new ExceptionsHandler();
 
     constructor(
+
         private readonly jwtService: JwtService,
         private readonly _AuthRepositoryService: AuthRepositoryService,
         private readonly em: EntityManager,
@@ -201,7 +203,7 @@ export class AuthService {
             let new_auth = await this._AuthRepositoryService.create_auth({
                 email,
                 password: bcrypt.hashSync(password, 10),
-                user: '-'
+                user: uuid.v4()
             }, f_em);
 
             const new_user = await this._UserService_GW.create_user( {
@@ -227,8 +229,8 @@ export class AuthService {
 
         } catch (error) {
 
-            this.logger.error(`[Register user] Error: ${error}`);
-            this.ExceptionsHandler.EmitException(error, 'AuthService.registerUser');
+            this.logger.error(`[Register auth] Error: ${error}`);
+            this.ExceptionsHandler.EmitException(error, 'AuthService.create_auth');
 
         }
 

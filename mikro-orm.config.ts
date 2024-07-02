@@ -4,8 +4,6 @@ import { Migrator } from "@mikro-orm/migrations";
 import { envs } from "./src/core/config/envs";
 
 
-// console.log('envs', envs);
-
 const db_c = {
     dbName: envs.db_name || process.env.DB_NAME,
     host: envs.db_host || process.env.DB_HOST,

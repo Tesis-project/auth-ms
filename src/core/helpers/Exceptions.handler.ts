@@ -12,8 +12,6 @@ export class ExceptionsHandler {
 
     EmitException(error: any, context?: string) {
 
-        console.log('viene por exception', error);
-
         if (this.isResponseStructure(error?.error)) {
 
               throw new RpcException({

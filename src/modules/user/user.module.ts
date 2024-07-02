@@ -11,7 +11,6 @@ import { NatsModule } from '../../core/transports/nats.module';
     imports: [
         NatsModule
     ],
-    controllers: [],
     providers: [
         UserService_GW
     ],
