@@ -1,7 +1,7 @@
 import { Entity, Enum, Property } from "@mikro-orm/core";
 import { Schema_key } from "../../../core/entities_global";
 
-import {TempoHandler} from "@tesis-project/dev-globals/dist/classes"
+import {TempoHandler} from "@tesis-project/dev-globals/dist/core/classes"
 import { AuthStatus_Enum } from "@tesis-project/dev-globals/dist/modules/auth/interfaces";
 
 @Entity({

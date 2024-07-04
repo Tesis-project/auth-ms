@@ -1,14 +1,13 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { JWT_Payload_I } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepositoryService } from './entities';
 
-import * as bcrypt from 'bcrypt';
 import { envs } from '../../core/config/envs';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { RpcException } from '@nestjs/microservices';
 import { EntityManager } from '@mikro-orm/core';
 import { ExceptionsHandler } from '../../core/helpers';
-import { NATS_SERVICE } from '../../core/config/services';
 import { UserService_GW } from '../user/user.service';
 
 import {
@@ -16,11 +15,11 @@ import {
     RegisterAuth_Dto
 } from "@tesis-project/dev-globals/dist/modules/auth/dto"
 
-import {
-    TempoHandler
-} from "@tesis-project/dev-globals/dist/classes"
-import { _Response_I } from '@tesis-project/dev-globals/dist/interfaces';
+import { TempoHandler } from "@tesis-project/dev-globals/dist/core/classes"
+import { _Response_I } from '@tesis-project/dev-globals/dist/core/interfaces';
+
 import * as uuid from 'uuid';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -100,11 +99,10 @@ export class AuthService {
 
     async find_auth_by_email(email: string, f_em: EntityManager) {
 
-        const user = await this._AuthRepositoryService.find_one({email}, f_em);
+        const user = await this._AuthRepositoryService.find_one({ find: { email }, _em: f_em });
         return user;
 
     }
-
 
     async login(LoginAuth_Dto: LoginAuth_Dto) {
 
@@ -200,11 +198,19 @@ export class AuthService {
                 throw new RpcException(_Response)
             }
 
+            // let new_auth = await this._AuthRepositoryService.create_auth({
+            //     email,
+            //     password: bcrypt.hashSync(password, 10),
+            //     user: uuid.v4()
+            // }, f_em);
             let new_auth = await this._AuthRepositoryService.create_auth({
-                email,
-                password: bcrypt.hashSync(password, 10),
-                user: uuid.v4()
-            }, f_em);
+                save: {
+                    email,
+                    password: bcrypt.hashSync(password, 10),
+                    user: uuid.v4()
+                },
+                _em: f_em
+            })
 
             const new_user = await this._UserService_GW.create_user( {
                 auth: new_auth._id,
@@ -212,9 +218,11 @@ export class AuthService {
                 last_name
             } );
 
-            new_auth = await this._AuthRepositoryService.update_auth(new_auth, {
-                user: new_user.data._id
-            }, f_em);
+            new_auth = await this._AuthRepositoryService.update_auth({
+                find: { _id: new_auth._id },
+                update: { user: new_user.data._id },
+                _em: f_em
+            });
 
             _Response = {
                 ok: true,
@@ -235,8 +243,6 @@ export class AuthService {
         }
 
         return _Response;
-
-
 
     }
 

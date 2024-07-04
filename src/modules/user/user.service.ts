@@ -1,6 +1,3 @@
-/*
-https://docs.nestjs.com/providers#services
-*/
 
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -9,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { CreateUser_Dto } from '@tesis-project/dev-globals/dist/modules/user/dto';
 import { User_I } from '@tesis-project/dev-globals/dist/modules/user/interfaces';
-import { _Response_I } from '@tesis-project/dev-globals/dist/interfaces';
+import { _Response_I } from '@tesis-project/dev-globals/dist/core/interfaces';
 
 @Injectable()
 export class UserService_GW {

@@ -6,6 +6,8 @@ import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import { Auth_Ety } from './auth.entity';
 
+import { _Find_One_I, _Process_Save_I, _Process_Update_I } from '@tesis-project/dev-globals/dist/core/interfaces';
+
 @Injectable()
 export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
 
@@ -16,19 +18,17 @@ export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
         super(em, Auth_Ety);
     }
 
-    async create_auth(auth: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
+    async create_auth( {save, _em}: _Process_Save_I<Auth_Ety>): Promise<Auth_Ety> {
 
-        const _em = em ?? this.em;
-        const new_user = await _em.create(Auth_Ety, auth);
+        const new_user = await _em.create(Auth_Ety, save);
         await _em.persistAndFlush(new_user);
         return new_user;
 
     }
 
-    async find_one(auth: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
+    async find_one({ find, options, _em }: _Find_One_I<Auth_Ety, 'Auth_Ety'>): Promise<Auth_Ety> {
 
-        const _em = em ?? this.em;
-        return await _em.findOne(Auth_Ety, auth);
+        return await _em.findOne(Auth_Ety, find, options);
 
     }
 
@@ -37,10 +37,9 @@ export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
         return await _em.find(Auth_Ety, {});
     }
 
-    async delete_auth(auth: Partial<Auth_Ety>, em?: EntityManager): Promise<boolean> {
-        const _em = em ?? this.em;
-        // const auth = await _em.findOne(Auth_Ety, { id });
-        const user_find = await this.find_one(auth, _em);
+    async delete_auth({ find, _em }: _Find_One_I<Auth_Ety, 'Auth_Ety'>): Promise<boolean> {
+
+        const user_find = await this.find_one({ find, _em });
 
         if (!user_find) {
             throw new Error('User not found');
@@ -50,17 +49,16 @@ export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
         return true;
     }
 
-    async update_auth(auth: Partial<Auth_Ety>, updateData: Partial<Auth_Ety>, em?: EntityManager): Promise<Auth_Ety> {
+    async update_auth({ find, update, _em }: _Process_Update_I): Promise<Auth_Ety> {
 
-        const _em = em ?? this.em;
 
-        const user_find = await this.find_one(auth, _em);
+        const user_find = await this.find_one({find, _em});
 
         if (!user_find) {
             throw new Error('User not found');
         }
 
-        Object.assign(user_find, updateData);
+        Object.assign(user_find, update);
         await _em.persistAndFlush(user_find);
         return user_find;
 
