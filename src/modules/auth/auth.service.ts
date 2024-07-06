@@ -69,7 +69,7 @@ export class AuthService {
 
         try {
 
-            const user = await this.find_auth_by_email(email, f_em);
+            const user = await this.find_auth_by_email(email);
 
             if (!user) {
                 this.logger.warn(`[Update last session] El usuario ${email} no existe`);
@@ -78,28 +78,28 @@ export class AuthService {
 
             const last_session = new TempoHandler().date_now();
 
-            await this._AuthRepositoryService.nativeUpdate(user, {
-                last_session: last_session
-            });
+            const now_user = await this._AuthRepositoryService.update_auth({
+                find: { _id: user._id },
+                update: { last_session },
+                _em: f_em
+            })
 
             return {
-                ...user,
-                last_session
+                ...now_user
             }
 
         } catch (error) {
 
             this.logger.error(`[Update last session] Error: ${error}`);
-
             this.ExceptionsHandler.EmitException(error, 'AuthService.update_last_session');
 
         }
 
     }
 
-    async find_auth_by_email(email: string, f_em: EntityManager) {
+    async find_auth_by_email(email: string) {
 
-        const user = await this._AuthRepositoryService.find_one({ find: { email }, _em: f_em });
+        const user = await this._AuthRepositoryService.findOne({ email });
         return user;
 
     }
@@ -115,7 +115,7 @@ export class AuthService {
         try {
 
             const f_em = this.em.fork();
-            const user = await this.find_auth_by_email(email, f_em);
+            const user = await this.find_auth_by_email(email);
 
             if (!user) {
                 this.logger.warn(`[Login user] El usuario ${email} no existe`);
@@ -132,18 +132,18 @@ export class AuthService {
             const isPassValid = bcrypt.compareSync(password, user.password);
 
             if (!isPassValid) {
-                // this.logger.warn(`[Login user] Password no valido`);
                 _Response = {
                     ok: false,
                     statusCode: HttpStatus.BAD_REQUEST,
                     message: `Password no valido`,
                     data: null
                 }
-
                 return _Response;
             }
 
-            const now_user =  await this.update_last_session(email, f_em);
+            const now_user = await this.update_last_session(email, f_em);
+
+            f_em.flush();
 
             const {
                 password: ___,
@@ -186,7 +186,7 @@ export class AuthService {
         try {
 
             const f_em = this.em.fork();
-            const auth = await this.find_auth_by_email(email, f_em);
+            const auth = await this.find_auth_by_email(email);
 
             if (auth) {
                 _Response = {
@@ -198,19 +198,17 @@ export class AuthService {
                 throw new RpcException(_Response)
             }
 
-            // let new_auth = await this._AuthRepositoryService.create_auth({
-            //     email,
-            //     password: bcrypt.hashSync(password, 10),
-            //     user: uuid.v4()
-            // }, f_em);
             let new_auth = await this._AuthRepositoryService.create_auth({
                 save: {
+                    _id: uuid.v4(),
                     email,
                     password: bcrypt.hashSync(password, 10),
                     user: uuid.v4()
                 },
                 _em: f_em
             })
+
+            f_em.flush();
 
             const new_user = await this._UserService_GW.create_user( {
                 auth: new_auth._id,
@@ -223,6 +221,8 @@ export class AuthService {
                 update: { user: new_user.data._id },
                 _em: f_em
             });
+
+            f_em.flush();
 
             _Response = {
                 ok: true,

@@ -25,11 +25,6 @@ export class Auth_Guard implements CanActivate {
 
     }
 
-   async signJWT(payload: JWT_Payload_I){
-        return this.jwtService.sign(payload)
-    }
-
-
     async canActivate(context: ExecutionContext): Promise<boolean> {
 
         const request = context.switchToHttp().getRequest();
@@ -43,21 +38,12 @@ export class Auth_Guard implements CanActivate {
 
         try {
 
-            // const {user, token: newToken } = await firstValueFrom(
-            //     this.client.send('auth.verify.user', token)
-            // )
-
             const { sub, iat, exp, ...user } = this.jwtService.verify(token, {
                 secret: envs.jwtSecret
             });
 
             request['user'] = user
             request['token'] = token;
-
-            // return {
-            //     user,
-            //     token: await this.signJWT(user)
-            // }
 
 
         } catch {
