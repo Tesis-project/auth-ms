@@ -46,23 +46,33 @@ export class AuthService {
 
     async verifyToken(token: string) {
 
-           try {
+        let _Response: _Response_I;
 
-              const { sub, iat, exp, ...user } = this.jwtService.verify(token, {
-                  secret: envs.jwtSecret
-              });
+        try {
 
-              return {
-                  user,
-                  token: await this.signJWT(user)
-              }
+            const { sub, iat, exp, ...user } = this.jwtService.verify(token, {
+                secret: envs.jwtSecret
+            });
 
-          } catch (error) {
+            _Response = {
+                ok: true,
+                statusCode: HttpStatus.OK,
+                message: 'Token verificado',
+                data: {
+                    ...user,
+                    token: await this.signJWT(user)
+                },
+
+            }
+
+        } catch (error) {
 
             this.logger.error(`[ Verify token ] Error: ${error}`);
             this.ExceptionsHandler.EmitException(error, 'AuthService.verifyToken');
 
-          }
+        }
+
+        return _Response;
     }
 
     async update_last_session(email: string, f_em: EntityManager) {
@@ -110,7 +120,7 @@ export class AuthService {
         const {
             email,
             password,
-        } =LoginAuth_Dto;
+        } = LoginAuth_Dto;
 
         try {
 
@@ -126,7 +136,7 @@ export class AuthService {
                     data: null
                 }
 
-              throw new RpcException(_Response)
+                throw new RpcException(_Response)
             }
 
             const isPassValid = bcrypt.compareSync(password, user.password);
@@ -155,7 +165,7 @@ export class AuthService {
                 statusCode: HttpStatus.OK,
                 message: 'Sesión iniciada, bienvenido',
                 data: {
-                    user: rest,
+                    ...rest,
                     token: await this.signJWT(rest)
                 },
 
@@ -210,11 +220,11 @@ export class AuthService {
 
             f_em.flush();
 
-            const new_user = await this._UserService_GW.create_user( {
+            const new_user = await this._UserService_GW.create_user({
                 auth: new_auth._id,
                 name,
                 last_name
-            } );
+            });
 
             new_auth = await this._AuthRepositoryService.update_auth({
                 find: { _id: new_auth._id },

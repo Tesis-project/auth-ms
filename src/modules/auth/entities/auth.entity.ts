@@ -50,6 +50,10 @@ export class Auth_Ety extends Schema_key {
     @Property()
     status: AuthStatus_Enum;
 
+    @Enum({ items: () => AuthStatus_Enum, default: AuthStatus_Enum.PENDING })
+    @Property()
+    role: AuthStatus_Enum;
+
     @Property({
         type: 'varchar',
         unique: true
