@@ -2,7 +2,7 @@ import { Entity, Enum, Property } from "@mikro-orm/core";
 import { Schema_key } from "../../../core/entities_global";
 
 import {TempoHandler} from "@tesis-project/dev-globals/dist/core/classes"
-import { AuthStatus_Enum } from "@tesis-project/dev-globals/dist/modules/auth/interfaces";
+import { AuthStatus_Enum, User_Role_Enum } from "@tesis-project/dev-globals/dist/modules/auth/interfaces";
 
 @Entity({
     tableName: 'auth',
@@ -50,9 +50,9 @@ export class Auth_Ety extends Schema_key {
     @Property()
     status: AuthStatus_Enum;
 
-    @Enum({ items: () => AuthStatus_Enum, default: AuthStatus_Enum.PENDING })
+    @Enum({ items: () => User_Role_Enum, default: User_Role_Enum.ARTIST_ROLE })
     @Property()
-    role: AuthStatus_Enum;
+    role: string = 'ARTIST_ROLE';
 
     @Property({
         type: 'varchar',

@@ -40,7 +40,9 @@ export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
             throw new Error('User not found');
         }
 
-        await _em.remove(user_find);
+         await _em.nativeDelete(Auth_Ety, {
+            _id: user_find._id
+        });
         return true;
     }
 

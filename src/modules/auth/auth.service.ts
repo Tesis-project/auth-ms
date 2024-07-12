@@ -191,7 +191,18 @@ export class AuthService {
             name,
             last_name,
             password,
+            role
         } = RegisterAuth_Dto;
+
+        if(role === 'ADMIN_ROLE') {
+                    _Response = {
+                    ok: false,
+                    data: null,
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: `Rol no permitido`,
+                }
+                throw new RpcException(_Response)
+        }
 
         try {
 
@@ -212,6 +223,7 @@ export class AuthService {
                 save: {
                     _id: uuid.v4(),
                     email,
+                    role,
                     password: bcrypt.hashSync(password, 10),
                     user: uuid.v4()
                 },

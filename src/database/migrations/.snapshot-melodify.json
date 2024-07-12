@@ -51,7 +51,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
-          "default": "'2024-06-16 23:17:17'",
+          "default": "'2024-07-08 08:56:20'",
           "mappedType": "datetime"
         },
         "updated_at": {
@@ -62,7 +62,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
-          "default": "'2024-06-16 23:17:17'",
+          "default": "'2024-07-08 08:56:20'",
           "mappedType": "datetime"
         },
         "last_session": {
@@ -93,6 +93,21 @@
             "PENDING",
             "ACTIVE",
             "INACTIVE"
+          ],
+          "mappedType": "enum"
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'ARTIST_ROLE'",
+          "enumItems": [
+            "ARTIST_ROLE",
+            "CONTRATIST_ROLE",
+            "ADMIN_ROLE"
           ],
           "mappedType": "enum"
         },
