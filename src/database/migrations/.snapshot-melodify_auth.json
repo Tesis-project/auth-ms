@@ -51,7 +51,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
-          "default": "'2024-07-08 08:56:20'",
+          "default": "'2024-07-12 06:15:37'",
           "mappedType": "datetime"
         },
         "updated_at": {
@@ -62,7 +62,7 @@
           "primary": false,
           "nullable": false,
           "length": 6,
-          "default": "'2024-07-08 08:56:20'",
+          "default": "'2024-07-12 06:15:37'",
           "mappedType": "datetime"
         },
         "last_session": {
