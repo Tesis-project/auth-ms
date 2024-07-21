@@ -1,15 +1,4 @@
 
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { JWT_Payload_I } from './interfaces';
-import { JwtService } from '@nestjs/jwt';
-import { AuthRepositoryService } from './entities';
-
-import { envs } from '../../core/config/envs';
-import { RpcException } from '@nestjs/microservices';
-import { EntityManager } from '@mikro-orm/core';
-import { ExceptionsHandler } from '../../core/helpers';
-import { UserService_GW } from '../user/user.service';
-
 import {
     LoginAuth_Dto,
     RegisterAuth_Dto
@@ -17,6 +6,20 @@ import {
 
 import { TempoHandler } from "@tesis-project/dev-globals/dist/core/classes"
 import { _Response_I } from '@tesis-project/dev-globals/dist/core/interfaces';
+
+import { Connection, EntityManager, IDatabaseDriver } from "@mikro-orm/core";
+import { Injectable, Logger, HttpStatus } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { RpcException } from "@nestjs/microservices";
+import { envs } from "../../../core/config/envs";
+import { UserService_GW } from "../../user/user.service";
+import { Auth_Ety, AuthRepositoryService } from "../entities";
+import { JWT_Payload_I } from "../interfaces";
+
+import { ExceptionsHandler } from "../../../core/helpers";
+import { RequestsService } from "../../requests/services";
+import { RequestType_Enum } from "@tesis-project/dev-globals/dist/modules/auth/interfaces/requests";
+import { Notifications_Emailing_Service_GW, Notifications_Service_GW } from "../../notifications";
 
 import * as uuid from 'uuid';
 import * as bcrypt from 'bcrypt';
@@ -29,11 +32,12 @@ export class AuthService {
     ExceptionsHandler = new ExceptionsHandler();
 
     constructor(
-
         private readonly jwtService: JwtService,
         private readonly _AuthRepositoryService: AuthRepositoryService,
+        private readonly _RequestsService: RequestsService,
         private readonly em: EntityManager,
-
+        private readonly _EmailingService_GW: Notifications_Emailing_Service_GW,
+        private readonly _NotificationsService_GW: Notifications_Service_GW,
         private readonly _UserService_GW: UserService_GW
 
     ) {
@@ -75,7 +79,7 @@ export class AuthService {
         return _Response;
     }
 
-    async update_last_session(email: string, f_em: EntityManager) {
+    async update_last_session(email: string, f_em: EntityManager<IDatabaseDriver<Connection>> ): Promise<Auth_Ety> {
 
         try {
 
@@ -194,14 +198,14 @@ export class AuthService {
             role
         } = RegisterAuth_Dto;
 
-        if(role === 'ADMIN_ROLE') {
-                    _Response = {
-                    ok: false,
-                    data: null,
-                    statusCode: HttpStatus.BAD_REQUEST,
-                    message: `Rol no permitido`,
-                }
-                throw new RpcException(_Response)
+        if (role === 'ADMIN_ROLE') {
+            _Response = {
+                ok: false,
+                data: null,
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `Rol no permitido`,
+            }
+            throw new RpcException(_Response)
         }
 
         try {
@@ -243,6 +247,27 @@ export class AuthService {
                 update: { user: new_user.data._id },
                 _em: f_em
             });
+
+            const request = await this._RequestsService.create_request(
+                { type: RequestType_Enum.CONFIRM_ACCOUNT, detail: '' },
+                {
+                    _id: new_auth._id
+                }
+            );
+
+            await this._EmailingService_GW.send_email({
+                to: email,
+                confirm_account: {
+                    key: request.data.key,
+                    name: new_user.data.name,
+                }
+            })
+
+            await this._NotificationsService_GW.create_notification( {
+                subject: `Bienvenido ${new_user.data.name} ${new_user.data.last_name}`,
+                message: `Te damos la bienvenida a nuestra plataforma, esperamos que disfrutes de nuestros servicios`,
+                user: new_user.data._id
+            })
 
             f_em.flush();
 

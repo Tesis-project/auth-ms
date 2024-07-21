@@ -1,14 +1,19 @@
-import { Entity, Enum, Property } from "@mikro-orm/core";
+import { Entity, EntityRepositoryType, Enum, OneToMany, Property } from "@mikro-orm/core";
 import { Schema_key } from "../../../core/entities_global";
 
-import {TempoHandler} from "@tesis-project/dev-globals/dist/core/classes"
+import { TempoHandler } from "@tesis-project/dev-globals/dist/core/classes"
 import { AuthStatus_Enum, User_Role_Enum } from "@tesis-project/dev-globals/dist/modules/auth/interfaces";
+import { Requests_Ety } from "../../requests/entities/requests.entity";
+import { Auth_RepositoryService } from "./auth.repository.service";
 
 @Entity({
     tableName: 'auth',
-    collection: 'auth'
+    collection: 'auth',
+    repository: () => Auth_RepositoryService
 })
 export class Auth_Ety extends Schema_key {
+
+    [EntityRepositoryType]?: Auth_RepositoryService;
 
     @Property({
         type: 'varchar',
@@ -59,5 +64,8 @@ export class Auth_Ety extends Schema_key {
         unique: true
     })
     user: any;
+
+    @OneToMany(() => Requests_Ety, request => request.auth, { mappedBy: 'auth', orphanRemoval: true })
+    requests: Requests_Ety[];
 
 }

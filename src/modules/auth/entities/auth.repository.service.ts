@@ -9,7 +9,7 @@ import { Auth_Ety } from './auth.entity';
 import { _Find_One_I, _Process_Save_I, _Process_Update_I } from '@tesis-project/dev-globals/dist/core/interfaces';
 
 @Injectable()
-export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
+export class Auth_RepositoryService extends EntityRepository<Auth_Ety> {
 
 
     constructor(
@@ -66,3 +66,13 @@ export class AuthRepositoryService extends EntityRepository<Auth_Ety> {
 
 
 }
+
+
+/*
+
+{
+    "type": "CONFIRM_ACCOUNT"
+    "auth": "e705622b-bce2-43ef-8b2e-cc39028298ad"
+}
+
+*/

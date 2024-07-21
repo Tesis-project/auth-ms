@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Auth_Ety } from './entities/auth.entity';
@@ -9,6 +8,8 @@ import { AuthRepositoryService } from './entities';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { NatsModule } from '../../core/transports/nats.module';
+import { AuthService } from './services/auth.service';
+import { RequestsModule } from '../requests/requests.module';
 
 @Module({
     controllers: [AuthController],
@@ -36,7 +37,8 @@ import { NatsModule } from '../../core/transports/nats.module';
             Auth_Ety
         ]),
 
-        NatsModule
+        NatsModule,
+        RequestsModule
     ]
 })
 export class AuthModule { }

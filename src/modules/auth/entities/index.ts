@@ -1,4 +1,4 @@
 export { Auth_Ety } from './auth.entity';
 
-export { AuthRepositoryService } from './auth.repository.service';
+export { Auth_RepositoryService as AuthRepositoryService } from './auth.repository.service';
 
