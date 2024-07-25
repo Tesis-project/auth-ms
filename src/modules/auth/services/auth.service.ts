@@ -21,6 +21,8 @@ import { RequestsService } from "../../requests/services";
 import { RequestType_Enum } from "@tesis-project/dev-globals/dist/modules/auth/interfaces/requests";
 import { Notifications_Emailing_Service_GW, Notifications_Service_GW } from "../../notifications";
 
+import { Auth_User_I_Dto } from "@tesis-project/dev-globals/dist/modules/auth/dto";
+
 import * as uuid from 'uuid';
 import * as bcrypt from 'bcrypt';
 
@@ -28,7 +30,6 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
 
     private readonly logger = new Logger('AuthService');
-
     ExceptionsHandler = new ExceptionsHandler();
 
     constructor(
@@ -79,7 +80,7 @@ export class AuthService {
         return _Response;
     }
 
-    async update_last_session(email: string, f_em: EntityManager<IDatabaseDriver<Connection>> ): Promise<Auth_Ety> {
+    async update_last_session(email: string, f_em: EntityManager<IDatabaseDriver<Connection>>): Promise<Auth_Ety> {
 
         try {
 
@@ -251,23 +252,11 @@ export class AuthService {
             const request = await this._RequestsService.create_request(
                 { type: RequestType_Enum.CONFIRM_ACCOUNT, detail: '' },
                 {
-                    _id: new_auth._id
+                    _id: new_auth._id,
+                    email: new_auth.email,
+                    user: new_auth.user
                 }
             );
-
-            await this._EmailingService_GW.send_email({
-                to: email,
-                confirm_account: {
-                    key: request.data.key,
-                    name: new_user.data.name,
-                }
-            })
-
-            await this._NotificationsService_GW.create_notification( {
-                subject: `Bienvenido ${new_user.data.name} ${new_user.data.last_name}`,
-                message: `Te damos la bienvenida a nuestra plataforma, esperamos que disfrutes de nuestros servicios`,
-                user: new_user.data._id
-            })
 
             f_em.flush();
 

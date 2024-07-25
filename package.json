@@ -35,7 +35,7 @@
         "@nestjs/microservices": "^10.3.10",
         "@nestjs/passport": "^10.0.3",
         "@nestjs/platform-express": "^10.3.10",
-        "@tesis-project/dev-globals": "^1.0.752",
+        "@tesis-project/dev-globals": "^1.0.754",
         "bcrypt": "^5.1.1",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.1",

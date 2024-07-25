@@ -13,6 +13,8 @@ import { RequestStatus_Enum, RequestType_Enum } from '@tesis-project/dev-globals
 import { Requests_Auth_Service } from './requests-auth.service';
 import { TempoHandler } from '@tesis-project/dev-globals/dist/core/classes';
 
+import { Notifications_Emailing_Service_GW, Notifications_Service_GW } from '../../notifications';
+
 import * as keygen from 'keygen';
 
 @Injectable()
@@ -25,6 +27,8 @@ export class RequestsService {
     constructor(
         private readonly _Requests_Repository: Requests_Repository,
         private readonly _Requests_Auth_Service: Requests_Auth_Service,
+        private readonly _EmailingService_GW: Notifications_Emailing_Service_GW,
+        private readonly _NotificationsService_GW: Notifications_Service_GW,
         private readonly em: EntityManager,
     ) {
 
@@ -49,23 +53,40 @@ export class RequestsService {
 
             if (get_auth) {
 
+                          const key = keygen.url(175);
+
                 const request = await this._Requests_Repository.create_requests({
                     save: {
                         type: RequestType_Enum.RESET_PASSWORD,
-                        key: keygen.url(100),
-                        auth: get_auth
+                        key: key,
+                        auth: get_auth,
+                        detail: email
                     },
                     _em: f_em
                 });
 
                 f_em.flush();
 
+                await this._EmailingService_GW.send_email({
+                    to: email,
+                    reset_password: {
+                        key: request.key,
+                        name: get_auth.email,
+                    }
+                })
+
+                await this._NotificationsService_GW.create_notification({
+                    subject: `Solicitud de restablecimiento de contraseña`,
+                    message: `Se ha solicitado un restablecimiento de contraseña para la cuenta ${email}, para más información ingrese a su cuenta de email`,
+                    user: get_auth.user
+                });
+
             }
 
             _Response = {
                 ok: true,
                 statusCode: 201,
-                message: `Si el correo ${email} existe, se ha enviado un correo con las instrucciones para restablecer la contraseña`,
+                message: `Se le ha enviado un correo con las instrucciones para restablecer la contraseña`,
                 data: null
             }
 
@@ -91,10 +112,11 @@ export class RequestsService {
 
         try {
 
+
             const f_em = this.em.fork();
             const _Auth_Repository = f_em.getRepository(Auth_Ety);
 
-            const key = keygen.url(100);
+            const key = keygen.url(175);
 
             const get_auth = await _Auth_Repository.findOne({
                 _id: user_auth._id
@@ -112,6 +134,43 @@ export class RequestsService {
 
             f_em.flush();
 
+            if (type === RequestType_Enum.CONFIRM_ACCOUNT) {
+
+                await this._EmailingService_GW.send_email({
+                    to: get_auth.email,
+                    confirm_account: {
+                        key: key,
+                        name: '',
+                    }
+                });
+
+                await this._NotificationsService_GW.create_notification({
+                    subject: `Bienvenido`,
+                    message: `Te damos la bienvenida a nuestra plataforma, esperamos que disfrutes de nuestros servicios`,
+                    user: user_auth.user
+                });
+
+            }
+            if (type === RequestType_Enum.CHANGE_EMAIL) {
+
+                await this._EmailingService_GW.send_email({
+                    to: get_auth.email,
+                    change_email: {
+                        key: key,
+                        name: '',
+                        new_email: detail
+                    }
+                });
+
+                await this._NotificationsService_GW.create_notification({
+                    subject: 'Cambio de correo',
+                    message: `Se ha solicitado un cambio de correo para la cuenta ${get_auth.email}, para más información ingrese a su cuenta de email`,
+                    user: user_auth.user
+                });
+
+            }
+
+
             _Response = {
                 ok: true,
                 statusCode: 201,
@@ -127,6 +186,7 @@ export class RequestsService {
 
         } catch (error) {
 
+            console.log('error', error)
             this.logger.error(`[Create request] Error: ${error}`);
             this.ExceptionsHandler.EmitException(error, `${this.service}.create_request`);
 
@@ -143,7 +203,7 @@ export class RequestsService {
         try {
 
             const request = await this._Requests_Repository.findOne({
-                key
+                key: key
             });
 
             if (!request) {
@@ -198,6 +258,7 @@ export class RequestsService {
                     message: 'Solicitud no encontrada'
                 })
             }
+
             if (request.status === RequestStatus_Enum.USED) {
                 throw new RpcException({
                     ok: false,
@@ -206,6 +267,7 @@ export class RequestsService {
                     message: 'Solicitud ya utilizada'
                 })
             }
+
             if (!(request.type === RequestType_Enum.CONFIRM_ACCOUNT || request.type === RequestType_Enum.CHANGE_EMAIL)) {
                 throw new RpcException({
                     ok: false,
@@ -249,8 +311,6 @@ export class RequestsService {
                 });
 
             f_em.flush();
-
-            delete request.auth;
 
             _Response = {
                 ..._Response,

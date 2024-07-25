@@ -62,17 +62,4 @@ export class Auth_RepositoryService extends EntityRepository<Auth_Ety> {
     }
 
 
-
-
-
 }
-
-
-/*
-
-{
-    "type": "CONFIRM_ACCOUNT"
-    "auth": "e705622b-bce2-43ef-8b2e-cc39028298ad"
-}
-
-*/

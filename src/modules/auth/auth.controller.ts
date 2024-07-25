@@ -1,8 +1,8 @@
-import { Controller } from '@nestjs/common';
+import { Controller, ParseUUIDPipe } from '@nestjs/common';
 
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
-import { LoginAuth_Dto, RegisterAuth_Dto } from '@tesis-project/dev-globals/dist/modules/auth/dto';
+import { Auth_User_I_Dto, LoginAuth_Dto, RegisterAuth_Dto } from '@tesis-project/dev-globals/dist/modules/auth/dto';
 import { AuthService } from './services/auth.service';
 
 @Controller()
@@ -23,6 +23,7 @@ export class AuthController {
 
         return this.authService.login(loginUserDto);
     }
+
 
     @MessagePattern('auth.verify.user')
     verifyUser(@Payload() token: string) {
