@@ -32,4 +32,12 @@ export class AuthController {
 
     }
 
+    @MessagePattern('auth.info_auth.user')
+    get_authInfo_byId(
+        @Payload('_id', ParseUUIDPipe) _id: string
+    ) {
+        return this.authService.get_authInfo_byId(_id);
+
+    }
+
 }

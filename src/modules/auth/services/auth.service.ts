@@ -45,6 +45,49 @@ export class AuthService {
 
     }
 
+    async get_authInfo_byId(_id: string) {
+
+        let _Response: _Response_I;
+
+        try {
+
+            const f_em = this.em.fork();
+            const auth = await this._AuthRepositoryService.findOne({
+                _id
+            });
+
+            if (!auth) {
+                this.logger.warn(`[Get auth info] El auth ${_id} no existe`);
+                _Response = {
+                    ok: false,
+                    statusCode: HttpStatus.NOT_FOUND,
+                    message: `El auth ${_id} no existe`,
+                    data: null
+                }
+
+                throw new RpcException(_Response)
+            }
+
+            _Response = {
+                ok: true,
+                statusCode: HttpStatus.OK,
+                message: 'Auth encontrado',
+                data: {
+                    ...auth
+                }
+            }
+
+        } catch (error) {
+
+            this.logger.error(`[Get auth info] Error: ${error}`);
+            this.ExceptionsHandler.EmitException(error, 'AuthService.get_authInfo_byId');
+
+        }
+
+        return _Response;
+
+    }
+
     async signJWT(payload: JWT_Payload_I) {
         return this.jwtService.sign(payload)
     }
@@ -281,5 +324,6 @@ export class AuthService {
         return _Response;
 
     }
+
 
 }
