@@ -112,7 +112,6 @@ export class RequestsService {
 
         try {
 
-
             const f_em = this.em.fork();
             const _Auth_Repository = f_em.getRepository(Auth_Ety);
 
